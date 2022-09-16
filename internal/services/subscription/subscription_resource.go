@@ -224,6 +224,10 @@ func resourceSubscriptionCreate(d *pluginsdk.ResourceData, meta interface{}) err
 		return fmt.Errorf("failed waiting for Subscription %q (Alias %q) to enter %q state: %+v", *alias.Properties.SubscriptionID, id.Name, "Active", err)
 	}
 
+	if subscriptionId == "" {
+		subscriptionId = *alias.Properties.SubscriptionID
+	}
+
 	if d.HasChange("tags") {
 		tagsClient := meta.(*clients.Client).Resource.TagsClientForSubscription(*alias.Properties.SubscriptionID)
 		t := tags.Expand(d.Get("tags").(map[string]interface{}))
@@ -238,6 +242,7 @@ func resourceSubscriptionCreate(d *pluginsdk.ResourceData, meta interface{}) err
 		}
 	}
 
+	d.Set("subscription_id", subscriptionId)
 	d.SetId(id.ID())
 
 	return resourceSubscriptionRead(d, meta)
